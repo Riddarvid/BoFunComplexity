@@ -26,6 +26,9 @@ computeMinStep = Endo $ \recCall fun -> if isJust (isConst fun)
         return $ factor * recCall (setBit (i, value) fun)
     return $ a + b
 
+-- QUESTION: What are the minimum requirements to be able to use computeMin?
+-- Which typeclasses do we have to implement?
+
 computeMin :: (Show f, BoFun f i, Memoizable f) => f -> PiecewisePoly Rational
 computeMin = fix $ appEndo computeMinStep >>> memoize
 
@@ -97,7 +100,7 @@ main = do
   putStrLn $ "maj5_1: " ++ showPW maj5_1
   putStrLn $ "maj5_2: " ++ showPW maj5_2
   putStrLn $ "maj3_2: " ++ showPW maj3_2
-  putStrLn $ "maj3_3: " ++ showPW maj3_3
+  -- putStrLn $ "maj3_3: " ++ showPW maj3_3
 
 ----------------
 -- Preparing for some plotting (see Maj3_3.hs)

@@ -63,6 +63,8 @@ thresholdMaj :: Int -> Threshold
 thresholdMaj = duplicate >>> Threshold
 
 
+-- QUESTION: How does this represent a threshold function? Is the threshold tuple the number of 0/1s?
+
 -- | A threshold-type Boolean function.
 data ThresholdFun f = ThresholdFun {
   threshold :: Threshold,
@@ -127,6 +129,16 @@ thresholdFunNormalizeSub (ThresholdFun t us) = ThresholdFun (t - s) (MultiSet.fr
     & map (\(val, k) -> thresholdScale k (thresholdConst val))
     & sum
 -}
+
+-- QUESTION: It seems like we start by having a BoFun f and then "promoting" it to a
+-- ThresholdFun. It is a bit unclear what the variable type actually means.
+-- How does setBit work here?
+
+-- OUR UNDERSTANDING: A threshold function is made up of a list of sub-functions.
+-- The variables of our function can then be described by a combination of sub-function
+-- and sub-function-variable. The basic principle is that any time a sub function becomes
+-- fully evaluated, we can reduce the appropriate threshold variable by one, and if the 
+-- threshold becomes zero, then we are done.
 
 -- TODO: Figure out why this needs UndecidableInstances. (Haskell...)
 instance (Ord f, BoFun f i) => BoFun (ThresholdFun f) (Int, i) where

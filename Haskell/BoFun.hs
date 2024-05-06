@@ -48,11 +48,14 @@ instance BoFun (Maybe Bool) () where
   variables = maybe [()] $ const []
   setBit ((), val) Nothing = Just val
 
+-- For a BoFun f, for each variable generates two new BoFuns by setting that variable to either
+-- True or False. 
 outgoing :: (BoFun f i) => f -> [f]
 outgoing u = do
   v <- variables u
   val <- [True, False]
   return $ setBit (v, val) u
 
+-- Recursively generates the set of all sub-BoFuns of f. 
 reachable :: (Ord f, BoFun f i) => f -> Set.Set f
 reachable = dfs' outgoing
