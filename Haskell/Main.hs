@@ -1,36 +1,12 @@
 module Main where
 
-import Control.Arrow((>>>))
-import Data.Function (fix)
-import Data.Function.Memoize (Memoizable(..), traceMemoize, memoFix)
 import Data.Maybe (isJust)
-import Data.Monoid (Endo(..))
 import Debug.Trace (trace)
-import Prelude hiding ((+), (-), (*))
--- import Graphics.Gnuplot.Simple
-
-import DSLsofMath.Algebra
-
-import BoFun
-import PiecewisePoly
-import Threshold
-
-computeMinStep :: (Show f, BoFun f i) => Endo (f -> PiecewisePoly Rational)
-computeMinStep = Endo $ \recCall fun -> if isJust (isConst fun)
-  then zero
-  else one + minPWs $ do
-    i <- variables fun
-    let
-      [a, b] = do
-        (value, factor) <- [(False, mempty), (True, one - mempty)]
-        return $ factor * recCall (setBit (i, value) fun)
-    return $ a + b
-
--- QUESTION: What are the minimum requirements to be able to use computeMin?
--- Which typeclasses do we have to implement?
-
-computeMin :: (Show f, BoFun f i, Memoizable f) => f -> PiecewisePoly Rational
-computeMin = fix $ appEndo computeMinStep >>> memoize
+import BoFun ()
+import Threshold ( iteratedMaj3, iteratedMaj5 )
+import PiecewisePoly (PiecewisePoly, evalPW, showPW)
+import Computing (computeMin)
+import qualified Explore
 
 {-
 * separated by 0 % 1
@@ -97,9 +73,10 @@ maj5_2 = computeMin $ Threshold.iteratedMaj5 2
 
 main :: IO ()
 main = do
-  putStrLn $ "maj5_1: " ++ showPW maj5_1
-  putStrLn $ "maj5_2: " ++ showPW maj5_2
-  putStrLn $ "maj3_2: " ++ showPW maj3_2
+  Explore.main
+  -- putStrLn $ "maj5_1: " ++ showPW maj5_1
+  -- putStrLn $ "maj5_2: " ++ showPW maj5_2
+  -- putStrLn $ "maj3_2: " ++ showPW maj3_2
   -- putStrLn $ "maj3_3: " ++ showPW maj3_3
 
 ----------------
