@@ -27,10 +27,12 @@ computeMinStep = Endo $ \recCall fun -> if isJust (isConst fun)
 -- That is, prob of 1 * cost if 1 + prob of 0 * cost if 0.
 -- So the do block returns a list of expected values.
 -- We still need to figure out what exactly minPWs does.
+-- I guess it returns the piecewise polynomial representing the cheapest "pieces"
+-- for the various ranges.
 -- QUESTION: Check that our explanation/understanding is correct.
+-- Syfte med Endo: Göra mer kompatibelt med Agda, representerar en rekursion
 
 -- QUESTION: What are the minimum requirements to be able to use computeMin?
--- Which typeclasses do we have to implement?
-
+-- Which typeclasses do we have to implement? -- Känns som att vi förstår detta nu.
 computeMin :: (Show f, BoFun f i, Memoizable f) => f -> PiecewisePoly Rational
 computeMin = fix $ appEndo computeMinStep >>> memoize

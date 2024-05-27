@@ -1,0 +1,40 @@
+1. Har vi förstått computeMinStep korrekt? Hade du kunnat förklara den här typen av
+rekursion där man använder sig av endo för att göra det rekursiva callet?
+Finns det en särskild anledning till detta? Har det med memoization att göra?
+
+2. När det kommer till symmetriska funktioner kommer väl ordningen per definition inte spela roll?
+På vilka sätt kan vi nyttja symmetri utan att problemet blir trivialt?
+Mer generellt, hur borde vi tänka när vi väljer subclasses?
+Hade vi kunnat visa vår implementation för att se om den verkar korrekt?
+Fråga om hur vi har valt att implementera results - kan det vara en funktion istället?
+
+3. Känns som att vi har okej koll på ThresholdFun nu. Men i allmänhet är den filen ganska förvirrande.
+
+4. Fråga om dervieMemoizable
+
+5. Hela PiecewisePoly. Vad är syftet med de olika delarna, specifikt Zoom, Zoomdata.
+
+6. Hur tolkar man resultatet av showPW?
+  - Gränserna beskrivs av ett intervall mellan två rationella tal, samt ett polynom
+  - som har exakt en rot i det intervallet. Den roten är punkten där vi byter till
+  - nästa polynom.
+
+Intressanta subclasses:
+  - Monotona
+  - Vi kan skapa större klass av funktioner genom att använda nivåer av symmetri, eller nivåer av threshold (se tidigare kod)
+  - Not på alla bitar -> Not på resultatet f(not b1.. not bn) -> not f (b1 .. bn)
+    - Motsvarande men att vi inte kör not
+    - Hur ändras utdata om vi flippar alla bitar?
+  - Välj bassyntax/grindar att utgå från, vilka funktioner kan vi skapa av dessa?
+    - NAND
+  - Klasser av funktioner som är invarianta på olika operationer på bitarna
+    -ex invariant under reverse, invariant under bitflip av samtliga bitar.
+
+Läs igenom koden i All, där finns allt som var med i artikeln.
+Där representerat ett PiecewisePoly som en lista av Polynom.
+
+Anledningen att 27-bits iterated majority funkar är effektiviseringar både i representationen
+av Iterated ThresholdFun och att man använder PiecewisePoly ist för lista av Poly
+
+SYftet medd Zoom är att expandera intervallet [0, 0.5] till [0, 1], men vi vill vara lata
+och inte göra onödigt arbete förrän det faktiskt behövs.
