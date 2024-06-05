@@ -1,6 +1,7 @@
 1. Har vi förstått computeMinStep korrekt? Hade du kunnat förklara den här typen av
 rekursion där man använder sig av endo för att göra det rekursiva callet?
 Finns det en särskild anledning till detta? Har det med memoization att göra?
+  - Syfte med Endo: Göra mer kompatibelt med Agda, representerar en rekursion
 
 2. När det kommer till symmetriska funktioner kommer väl ordningen per definition inte spela roll?
 På vilka sätt kan vi nyttja symmetri utan att problemet blir trivialt?
@@ -13,6 +14,8 @@ Fråga om hur vi har valt att implementera results - kan det vara en funktion is
 4. Fråga om dervieMemoizable
 
 5. Hela PiecewisePoly. Vad är syftet med de olika delarna, specifikt Zoom, Zoomdata.
+  - Vi behöver egentligen inte förstå hur denna funkar, men syftet är att kunna göra 
+  effektiva jämförelser mellan piecewise polynom, samt att leta rötter i dem.
 
 6. Hur tolkar man resultatet av showPW?
   - Gränserna beskrivs av ett intervall mellan två rationella tal, samt ett polynom
@@ -38,3 +41,7 @@ av Iterated ThresholdFun och att man använder PiecewisePoly ist för lista av P
 
 SYftet medd Zoom är att expandera intervallet [0, 0.5] till [0, 1], men vi vill vara lata
 och inte göra onödigt arbete förrän det faktiskt behövs.
+
+--------------------------------------------------
+
+IDÉ: Ha med vårt första test med symmetrisk funktion i slutrapporten - tydligt och enkelt exempel.
