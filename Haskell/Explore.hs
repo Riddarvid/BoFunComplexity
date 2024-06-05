@@ -49,16 +49,38 @@ instance BoFun Symmetric () where
 -- Bra approach: Med en representering: Jämför antalet värden av vår datatyp med antalet funktioner
 -- i den klass vi vill representera.
 
+newtype Symmetric2 = Symmetric2 [Bool]
+  deriving Show
+
+instance BoFun Symmetric2 () where
+  isConst :: Symmetric2 -> Maybe Bool
+  isConst (Symmetric2 xs)
+    | and xs = Just True
+    | all not xs = Just False
+    | otherwise = Nothing
+  variables :: Symmetric2 -> [()]
+  variables (Symmetric2 xs) = replicate (length xs - 1) ()
+  setBit :: ((), Bool) -> Symmetric2 -> Symmetric2
+  setBit (_, v) (Symmetric2 xs)
+    | v = Symmetric2 $ tail xs
+    | otherwise = Symmetric2 $ init xs
+
 -- Memoizable instance
 $(deriveMemoizable ''Symmetric)
+
+$(deriveMemoizable ''Symmetric2)
 
 -- Examples
 
 mkSymmetric :: Int -> (Int -> Bool) -> Symmetric
 mkSymmetric nBits eval = Symmetric {ones = 0, bitsLeft = nBits, results = map eval [0 .. nBits]}
 
-sumMod2 :: Symmetric
-sumMod2 = mkSymmetric 50 (\n -> n `mod` 2 == 1)
+-- eval must be defined for [0 .. nBits]
+mkSymmetric2 :: Int -> (Int -> Bool) -> Symmetric2
+mkSymmetric2 nBits eval = Symmetric2 $ map eval [0 .. nBits]
+
+sumMod2 :: Symmetric2
+sumMod2 = mkSymmetric2 70 (\n -> n `mod` 2 == 1)
 
 main :: IO ()
 main = do
