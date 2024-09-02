@@ -8,29 +8,15 @@
         "type": "tabs",
         "children": [
           {
-            "id": "f076280e6aef7be7",
+            "id": "2503e31c63d239c9",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Welcome.md",
+                "file": "Readme.md",
                 "mode": "source",
                 "source": false
               }
-            }
-          }
-        ]
-      },
-      {
-        "id": "c0ccddbadd2c646c",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "4b6205c77cdcb2cd",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {}
             }
           }
         ]
@@ -99,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Welcome.md",
+                "file": "Readme.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -116,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Welcome.md",
+                "file": "Readme.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -139,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Welcome.md"
+                "file": "Readme.md"
               }
             }
           }
@@ -160,8 +146,9 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "f076280e6aef7be7",
+  "active": "2503e31c63d239c9",
   "lastOpenFiles": [
-    "Welcome.md"
+    "Welcome.md",
+    "Readme.md"
   ]
 }
