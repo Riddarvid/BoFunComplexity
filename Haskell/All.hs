@@ -1,27 +1,32 @@
-{-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ConstraintKinds      #-}
+{-# LANGUAGE FlexibleContexts     #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE InstanceSigs         #-}
+{-# LANGUAGE TemplateHaskell      #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 module All (module All, module BDD.Examples, module S, module Poly, module BDD) where
-import Prelude hiding (map, Num(..),Fractional(..), fromIntegral, sum, product)
-import qualified Prelude as P
-import qualified Data.Set as S (Set, singleton, toList, fromList, foldl,
-                                size, map, member, insert, empty, filter)
-import qualified Data.IntSet as IS (toList)
-import qualified Data.IntMap as IM (fromList)
-import DSLsofMath.PSDS as Poly (Poly(P), xP, evalP, degree)
-import DSLsofMath.Algebra (Ring, zero, (+), (-), one, (*))
-import Data.DecisionDiagram.BDD as BDD
-  (  BDD(Leaf, Branch), ItemOrder, AscOrder
-  ,  support, restrict, var, substSet, false, true
-  ,  Sig(SLeaf), inSig, outSig)
-import Data.Function.Memoize (Memoizable(memoize), memoFix, memoFix2, deriveMemoizable, traceMemoize)
-import BDD.Examples (Index, maj3, maj2, fAC, maj33)
+import           BDD.Examples             (Index, fAC, maj2, maj3, maj33)
+import           Data.DecisionDiagram.BDD as BDD (AscOrder, BDD (Branch, Leaf),
+                                                  ItemOrder, Sig (SLeaf), false,
+                                                  inSig, outSig, restrict,
+                                                  substSet, support, true, var)
+import           Data.Function.Memoize    (Memoizable (memoize),
+                                           deriveMemoizable, memoFix, memoFix2,
+                                           traceMemoize)
+import qualified Data.IntMap              as IM (fromList)
+import qualified Data.IntSet              as IS (toList)
+import qualified Data.Set                 as S (Set, empty, filter, foldl,
+                                                fromList, insert, map, member,
+                                                singleton, size, toList)
+import           DSLsofMath.Algebra       (Ring, one, zero, (*), (+), (-))
+import           DSLsofMath.PSDS          as Poly (Poly (P), degree, evalP, xP)
+import           Prelude                  hiding (Fractional (..), Num (..),
+                                           fromIntegral, map, product, sum)
+import qualified Prelude                  as P
 -- see paper 2.4
-import PolyCmp (cmpPoly, OrdField)
+import           PolyCmp                  (OrdField, cmpPoly)
 -- see paper 3.4
-import Debug.Trace
+import           Debug.Trace
 
 {-
 From the BDD library:
@@ -87,7 +92,7 @@ loc2Glob n = local2Global [1..n]
 -- end of index manipulation
 
 foldAlgor :: Algor a => Al -> a
-foldAlgor (Res b) = res b
+foldAlgor (Res b)        = res b
 foldAlgor (Pick i a0 a1) = pic i (foldAlgor a0) (foldAlgor a1)
 
 type Tup = [Bool]
@@ -140,7 +145,8 @@ resBoth b = Both (res b) (res b)
 picBoth i (Both a0 b0) (Both a1 b1) = Both (pic i a0 a1) (pic i b0 b1)
 
 instance Ord a            => Eq    (Both a b)  where (==)     = eqFirst
-instance Ord a            => Ord   (Both a b)  where compare  = compareFirst
+instance Ord a            => Ord   (Both a b)  where compare :: Ord a => Both a b -> Both a b -> Ordering
+                                                     compare  = compareFirst
 instance (Ord a, Thin a)  => Thin  (Both a b)  where cmp      = cmpFirst
 eqFirst       (Both a _)  (Both b _)  = EQ == compare a b
 compareFirst  (Both a _)  (Both b _)  = compare a b
