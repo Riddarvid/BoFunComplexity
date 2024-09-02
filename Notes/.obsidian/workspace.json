@@ -54,9 +54,21 @@
                 "source": false
               }
             }
+          },
+          {
+            "id": "42e5b90502be57b5",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Analysis of classes.md",
+                "mode": "source",
+                "source": false
+              }
+            }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -122,7 +134,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "TODO.md",
+                "file": "Analysis of classes.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -139,7 +151,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "TODO.md",
+                "file": "Analysis of classes.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -162,7 +174,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "TODO.md"
+                "file": "Analysis of classes.md"
               }
             }
           }
@@ -183,10 +195,11 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "22041acf8e0ce929",
+  "active": "42e5b90502be57b5",
   "lastOpenFiles": [
-    "Förklaring av arbetet.md",
     "TODO.md",
+    "Analysis of classes.md",
+    "Förklaring av arbetet.md",
     "Egenskaper hos boolska funktioner.md",
     "Readme.md",
     "List of Known Bugs.md",
