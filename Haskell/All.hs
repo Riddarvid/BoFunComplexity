@@ -226,9 +226,9 @@ genAlgStepThin ::
   (Thin a, BoFun fun, Algor a) =>
   (Int -> fun -> S.Set a) ->
   (Int -> fun -> S.Set a)
--- genAlgStepThin genAlg n f = thin (genAlgStep genAlg n f)
+genAlgStepThin genAlg n f = thin (genAlgStep genAlg n f)
 -- Use this variant to check the number of recursive calls made
-genAlgStepThin = genAlgStepThinTrace
+-- genAlgStepThin = genAlgStepThinTrace
 genAlgStepThinTrace genAlg n f =
   let ys = genAlgStep genAlg n f
       xs = thin ys

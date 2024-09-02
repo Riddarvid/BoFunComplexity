@@ -25,14 +25,14 @@ boolToBDD True  = true
 boolToBDD False = false
 
 mkBDD :: [BDD AscOrder] -> BDD AscOrder
-mkBDD output = pick 0
-    (pick 1
-      (pick 2 (output !! 7) (output !! 6))
-      (pick 2 (output !! 5) (output !! 4))
+mkBDD output = pick 1
+    (pick 2
+      (pick 3 (output !! 7) (output !! 6))
+      (pick 3 (output !! 5) (output !! 4))
     )
-    (pick 1
-      (pick 2 (output !! 3) (output !! 2))
-      (pick 2 (output !! 1) (output !! 0))
+    (pick 2
+      (pick 3 (output !! 3) (output !! 2))
+      (pick 3 (output !! 1) (output !! 0))
     )
 
 all3bitOutputs :: [[Bool]]
