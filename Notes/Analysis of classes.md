@@ -2,7 +2,7 @@ The total number of n-bit boolean functions is 2^(2^n). We can see this if we th
 
 ## Functions with exactly one 1 in output
 
-Given n input bits, there exist exactly n functions with only one 1 in the output:
+Given n input bits, there exist exactly 2^n functions with only one 1 in the output:
 
 000 0
 001 0
@@ -110,3 +110,15 @@ A function can be monotonic but not symmetric:
 11 1
 
 (const x y)
+
+## Number of functions
+
+|                    | 2-bit |     | 3-bit |     | 4-bit |     | n-bit              |
+| ------------------ | ----- | --- | ----- | --- | ----- | --- | ------------------ |
+| Total              | 16    |     | 256   |     | 65536 |     | 2^2^n              |
+| Symmetric          | 8     | 50% | 16    | 6%  | 32    | 0%  | 2^(n+1)            |
+| Monotonic          | 6     | 38% | 20    | 8%  | 168   | 0%  | Not known          |
+| Odd                | 4     | 25% | 16    | 6%  | 256   | 0%  | 2^(2^(n-1))        |
+| Even               | 4     | 25% | 16    | 6%  | 256   | 0%  | 2^(2^(n-1))        |
+| Same number of 0/1 | 6     | 38% | 70    | 27% | 12870 | 20% | 2^n choose 2^(n-1) |
+| Exactly one 1      | 4     | 25% | 8     | 3%  | 16    | 0%  | 2^n                |
