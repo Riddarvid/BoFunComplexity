@@ -1,18 +1,30 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use head" #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE InstanceSigs          #-}
+{-# LANGUAGE TypeSynonymInstances  #-}
 module Explore.ComputeAll () where
-import           All                (AscOrder, BDD, ItemOrder, Poly (P), false,
-                                     genAlgThinMemoPoly, xP)
+import           All                (AscOrder, BDD, ItemOrder, Poly (P), evalP,
+                                     false, genAlgThinMemoPoly, isConstBDD,
+                                     setBitBDD, support, xP)
 import           BDD.Examples       (pick, true)
 import           BoFun
 import           Computing          (computeMin)
+import           Data.Complex       (Complex ((:+)), realPart)
 import           Data.Either        (isLeft)
-import           Data.Maybe         (isJust)
+import           Data.Foldable      (find)
+import qualified Data.IntSet        as IS
+import           Data.Maybe         (fromJust, isJust)
 import           Data.Set           (Set, fromList, size, toList)
-import           DSLsofMath.Algebra (AddGroup, MulGroup, Multiplicative (one))
-import           PiecewisePoly      (PiecewisePoly, linearizePW, minPWs,
-                                     piecewiseFromPoly, showPW)
+import           Debug.Trace        (trace, traceShow)
+import           DSLsofMath.Algebra (AddGroup, Additive (zero), MulGroup,
+                                     Multiplicative (one))
+import           DSLsofMath.PSDS    (derP)
+import           PiecewisePoly      (PiecewisePoly, Separation,
+                                     Separation' (..), linearizePW, minPWs,
+                                     piecewiseFromPoly, printPW, showPW)
+import           Polynomial.Roots   (roots)
 
 test :: IO ()
 test = mapM_ print (genAllPPs 4)
@@ -23,29 +35,24 @@ test = mapM_ print (genAllPPs 4)
 countPieces :: (AddGroup a, MulGroup a, Eq a) => PiecewisePoly a -> Int
 countPieces pw = length $ filter isLeft $ linearizePW pw
 
--- Takes a set of Polynomials and creates the piecewise polynomial that is the minimum
--- of the polynomials at each point.
-polySetToPW :: (Show a, AddGroup a, MulGroup a, Ord a) => Set (Poly a) -> PiecewisePoly a
-polySetToPW polys = minPWs $ map piecewiseFromPoly $ toList polys
+predPW :: (AddGroup a, MulGroup a, Eq a) => Int -> PiecewisePoly a -> Bool
+predPW n pw = countPieces pw == n
 
-predPP :: Int -> Set a -> Bool
-predPP n s = size s >= n
+--uniquePPs :: [([Bool], Set (Poly Rational))] -> Set (Set (Poly Rational))
+--uniquePPs xs = fromList $ map snd xs
 
-uniquePPs :: [([Bool], Set (Poly Rational))] -> Set (Set (Poly Rational))
-uniquePPs xs = fromList $ map snd xs
+filterPieces :: Int -> [([Bool], PiecewisePoly Rational)] -> [([Bool], PiecewisePoly Rational)]
+filterPieces pieces = filter (\(_, pw) -> predPW pieces pw)
 
-findLarge :: Int -> Int -> [([Bool], Set (Poly Rational))]
-findLarge pieces bits = filter (\(_, pp) -> predPP pieces pp) $ genAllPPs bits
-
-genAllPPs :: Int -> [([Bool], Set (Poly Rational))]
-genAllPPs n = map (\out -> (out, genAlgThinMemoPoly n (bddFromOutput n out))) $
+genAllPPs :: Int -> [([Bool], PiecewisePoly Rational)]
+genAllPPs n = map (\out -> (out, computeMin (bddFromOutput n out :: BDD AscOrder))) $
   outputPermutations n
 
 boolToBDD :: Bool -> BDD a
 boolToBDD True  = true
 boolToBDD False = false
 
-bddFromOutput :: Int -> [Bool] -> BDD AscOrder
+bddFromOutput :: ItemOrder a => Int -> [Bool] -> BDD a
 bddFromOutput bits = bddFromOutput' bits 0
 
 bddFromOutput' :: ItemOrder a => Int -> Int -> [Bool] -> BDD a
@@ -64,11 +71,55 @@ permutations n = do
   vs <- permutations (n - 1)
   return (v : vs)
 
-test2 :: String
-test2 = showPW ppEx
+type BDDFun = BDD AscOrder
 
-ppEx :: PiecewisePoly Rational
-ppEx = minPWs $ map piecewiseFromPoly [p1, p2]
+instance BoFun BDDFun Int where
+  isConst :: BDDFun -> Maybe Bool
+  isConst = isConstBDD
+  variables :: BDDFun -> [Int]
+  variables = IS.toList . support
+  setBit :: (Int, Bool) -> BDDFun -> BDDFun
+  setBit (i, v) = setBitBDD i v
+
+
+-- Utils
+
+-- Takes a set of Polynomials and creates the piecewise polynomial that is the minimum
+-- of the polynomials at each point.
+polySetToPW :: (Show a, AddGroup a, MulGroup a, Ord a) => Set (Poly a) -> PiecewisePoly a
+polySetToPW polys = minPWs $ map piecewiseFromPoly $ toList polys
+
+test2 :: IO ()
+test2 = mapM_ printPW $
+  filter hasTwoMaxima polys
   where
-    p1 = P [1, 1]
-    p2 = P [2, -1]
+    polys = map snd $
+      filterPieces 4 $
+      genAllPPs 4
+
+hasTwoMaxima :: PiecewisePoly Rational -> Bool
+hasTwoMaxima pw = hasMaximum p1 p2 s12 && hasMaximum p3 p4 s34
+  where
+    [
+      _,
+      Left p1,
+      Right s12,
+      Left p2,
+      _,
+      Left p3,
+      Right s34,
+      Left p4,
+      Right _] = linearizePW pw
+
+hasMaximum :: Poly Rational -> Poly Rational -> Separation Rational -> Bool
+hasMaximum p1 p2 s = evalP p1' p > zero && evalP p1' p < zero
+  where
+    p1' = derP p1
+    p2' = derP p2
+    p = case s of
+      Dyadic p'                        -> p'
+      Algebraic (P pPoly, (low, high)) -> root
+        where
+          pRoots :: [Double]
+          pRoots = map realPart $ roots 1e-16 1000 $ map ((:+ zero) . fromRational) pPoly
+          root = toRational $ fromJust $ find (\n -> fromRational low <= n && n <= fromRational high) pRoots

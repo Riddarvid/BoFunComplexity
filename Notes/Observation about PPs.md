@@ -39,3 +39,16 @@ The functions with this complexity are:
 
 For functions with 3 bits, their complexities are at most described by 2-piece PPs.
 
+With 4 bits we find many PWs with more than 2 pieces.
+
+So far, the simplest one we've found is composed of
+
+p1(p) = 1 + 2p + p²
+p2(p) = 1 + 3p - p²
+p3(p) = 3 - p²
+
+We say that this is simple since it only consists of 2nd degree polynomials.
+
+We are not yet sure whether a simpler PW exists.
+
+Right now, computing the complexities for the 2^2^4 4-bit functions would take hours.
