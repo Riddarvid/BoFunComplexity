@@ -1,8 +1,7 @@
-{-# LANGUAGE InstanceSigs          #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use head" #-}
-module Explore.Compute3Bit () where
+module Explore.ComputeAll () where
 import           All           (AscOrder, BDD, ItemOrder, Poly, false,
                                 genAlgThinMemoPoly)
 import           BDD.Examples  (pick, true)
@@ -13,30 +12,24 @@ import           Data.Set      (Set)
 import           PiecewisePoly (PiecewisePoly)
 
 test :: IO ()
-test = mapM_ print interestingPPs
+test = mapM_ print (genAllPPs 3)
 
-interestingPPs :: [([Bool], Set (Poly Rational))]
-interestingPPs = filter (\(_, pp) -> not $ null pp) result
-  where
-    result = map (\out -> (out, genAlgThinMemoPoly 3 (mkBDD $ map boolToBDD out))) all3bitOutputs
+genAllPPs :: Int -> [([Bool], Set (Poly Rational))]
+genAllPPs n = map (\out -> (out, genAlgThinMemoPoly n (bddFromOutput n out))) $
+  outputPermutations n
 
-boolToBDD :: Bool -> BDD AscOrder
+boolToBDD :: Bool -> BDD a
 boolToBDD True  = true
 boolToBDD False = false
 
-mkBDD :: [BDD AscOrder] -> BDD AscOrder
-mkBDD output = pick 1
-    (pick 2
-      (pick 3 (output !! 7) (output !! 6))
-      (pick 3 (output !! 5) (output !! 4))
-    )
-    (pick 2
-      (pick 3 (output !! 3) (output !! 2))
-      (pick 3 (output !! 1) (output !! 0))
-    )
+bddFromOutput :: Int -> [Bool] -> BDD AscOrder
+bddFromOutput bits = bddFromOutput' bits 0
 
-all3bitOutputs :: [[Bool]]
-all3bitOutputs = outputPermutations 3
+bddFromOutput' :: ItemOrder a => Int -> Int -> [Bool] -> BDD a
+bddFromOutput' 0 varN out = boolToBDD (out !! varN)
+bddFromOutput' bits varN out = pick bits
+  (bddFromOutput' (bits - 1) (2 * varN + 1) out)
+  (bddFromOutput' (bits - 1) (2 * varN) out)
 
 outputPermutations :: Int -> [[Bool]]
 outputPermutations n = permutations (2^n)
