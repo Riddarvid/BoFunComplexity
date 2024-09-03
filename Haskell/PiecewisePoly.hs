@@ -1,27 +1,28 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DeriveFunctor          #-}
+{-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE MultiWayIf #-}
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE MultiWayIf             #-}
+{-# LANGUAGE RankNTypes             #-}
 module PiecewisePoly where
 
-import Control.Applicative (Applicative(..))
-import Control.Arrow ((>>>))
-import Control.Monad (forM_, guard)
-import Data.Bifunctor (Bifunctor(..), bimap)
-import Data.Function ((&))
-import Data.Maybe (fromMaybe, fromJust, isJust)
-import Data.Ratio ((%), numerator)
-import qualified Data.Set as S (Set, fromList, size)
-import Debug.Trace (trace, traceShow)
-import Prelude hiding (Num(..),Fractional(..), fromIntegral, min, sum, product)
+import           Control.Applicative (Applicative (..))
+import           Control.Arrow       ((>>>))
+import           Control.Monad       (forM_, guard)
+import           Data.Bifunctor      (Bifunctor (..), bimap)
+import           Data.Function       ((&))
+import           Data.Maybe          (fromJust, fromMaybe, isJust)
+import           Data.Ratio          (numerator, (%))
+import qualified Data.Set            as S (Set, fromList, size)
+import           Debug.Trace         (trace, traceShow)
+import           Prelude             hiding (Fractional (..), Num (..),
+                                      fromIntegral, min, product, sum)
 import qualified Prelude
 
-import DSLsofMath.Algebra
-import DSLsofMath.PSDS (Poly(P,unP), evalP, degree, comP, gcdP)
+import           DSLsofMath.Algebra
+import           DSLsofMath.PSDS     (Poly (P, unP), comP, degree, evalP, gcdP)
 
-import Util
-import PolynomialExtra
+import           PolynomialExtra
+import           Util
 
 
 -- | Zoom data:
@@ -29,7 +30,7 @@ import PolynomialExtra
 -- The intended use case is iterated reparametrizations of halves of the unit interval (and possibly their inverses).
 -- Here, the scale is two to the power of the negated zoom level.
 data ZoomData a = ZoomData {
-  zoomLevel :: Int,               -- ^ TODO: decide if we want that here
+  zoomLevel      :: Int,               -- ^ TODO: decide if we want that here
   zoomAffinePoly :: AffinePoly a  -- ^ affine transformation
 } deriving (Eq, Ord, Show, Read, Functor)
 
@@ -79,7 +80,7 @@ instance (Ring a) => Zoomable a (Poly a) where
 data Zoomed a x = Zoomed
   { original :: x           -- ^ the data at original scale
   , zoomData :: ZoomData a  -- ^ the zoom
-  , zoomed :: x             -- ^ the zoomed data
+  , zoomed   :: x             -- ^ the zoomed data
   } deriving (Show, Read)
 
 instance Functor (Zoomed a) where
@@ -91,7 +92,7 @@ instance Bifunctor Zoomed where
 -- | Really this is an instance of Applicative for each fixed zoomData attribute.
 instance Applicative (Zoomed a) where
   pure x = Zoomed x (error "pure for Zoomed lacks zoomData attribute") x
-  Zoomed fOrig z fZoomed <*> Zoomed xOrig _ xZoomed = Zoomed (fOrig xOrig) z (fZoomed xZoomed) 
+  Zoomed fOrig z fZoomed <*> Zoomed xOrig _ xZoomed = Zoomed (fOrig xOrig) z (fZoomed xZoomed)
 
 -- | Zoomed a is a pointed functor.
 zoomedTrivial :: (Ring a) => x -> Zoomed a x
@@ -125,7 +126,7 @@ instance (ZoomableAddGroup x a) => AddGroup (Zoomed x a) where
 -- | Approximations to values that turn into the exact values below a given zoom level.
 data ZoomedApprox a x = ZoomedApprox {
   approxValue :: Zoomed a x,     -- ^ current value
-  approxInfo  :: Maybe (Int, x)  -- ^ if current value is approximation: 
+  approxInfo  :: Maybe (Int, x)  -- ^ if current value is approximation:
                                  -- level bound below it is to be used
                                  -- and actual value
 } deriving (Show, Read)
@@ -135,7 +136,7 @@ viewApprox = approxValue
 
 approxTrueOrig :: ZoomedApprox a x -> x
 approxTrueOrig (ZoomedApprox v m) = case m of
-  Nothing -> original v
+  Nothing     -> original v
   Just (_, x) -> x
 
 normalizeApprox :: (Zoomable a x) => ZoomedApprox a x -> ZoomedApprox a x
@@ -191,7 +192,7 @@ type Intersect a = (ZoomedPoly a, Square (ZoomedPoly a))
 checkIntersect :: (Show a, Ring a, Ord a) => Intersect a -> Maybe ()
 checkIntersect (r, (p_0, p_1)) = case comparePoly (zoomed p_0, zoomed p_1) (zoomed r) of
   Just (Right _) -> Just ()
-  _ -> Nothing
+  _              -> Nothing
 
 -- | Regenerate an intersect at a specified zoom level.
 -- Returns Nothing if the resulting intersect is invalid.
@@ -232,13 +233,13 @@ pwCheckZoomData z p = let check p = guard $ zoomData p == z in case p of
 
 isPoly :: PiecewisePoly a -> Bool
 isPoly (PWPoly _) = True
-isPoly _ = False
+isPoly _          = False
 
 piecewiseFromPoly :: (Ring a) => Poly a -> PiecewisePoly a
 piecewiseFromPoly = zoomedTrivial >>> PWPoly
 
 data Separation' a a' = Dyadic a | Algebraic (Poly a', (a, a))
-  deriving (Eq, Ord)
+  deriving (Eq, Ord, Show)
 
 type Separation a = Separation' a a
 
@@ -246,7 +247,7 @@ linearizePW' :: (Eq a, Field a) =>
     ZoomData a -> PiecewisePoly a -> [Either (Poly a) (Separation a)]
 linearizePW' z p = case p of
   PWBisect p -> onBisect p
-  _ -> onOther
+  _          -> onOther
   where
   onBisect p = h $ case unify (p_0, p_1) of
     Just p   ->  [Left p]
@@ -282,9 +283,9 @@ bisectedIntersect (r, (p_0, p_1)) = if
   (p_1_l, p_1_r) = bisected p_1
 
 bisectedPW :: (Field a, Ord a) => PiecewisePoly a -> Square (PiecewisePoly a)
-bisectedPW (PWBisect x)     =  x
-bisectedPW (PWPoly p)       =  mapPair PWPoly $ bisected p
-bisectedPW (PWIntersect x)  =  bisectedIntersect x
+bisectedPW (PWBisect x)    =  x
+bisectedPW (PWPoly p)      =  mapPair PWPoly $ bisected p
+bisectedPW (PWIntersect x) =  bisectedIntersect x
 
 evalPW' :: (Field a, Ord a) => ZoomData a -> PiecewisePoly a -> a -> a
 evalPW' z p x = case p of
@@ -446,7 +447,7 @@ minII z p@(r, ps@(p_0, p_1)) q@(s, qs@(q_0, q_1)) pq@(pq_0, pq_1) common = case 
       where
       ps = bisectedIntersect p
       qs = bisectedIntersect q
-  
+
 minII' :: (Show a, Field a, Ord a) =>
     ZoomData a -> Intersect a -> Intersect a ->
     Square (Maybe (ZoomedApproxPoly a)) -> Maybe (ZoomedApproxPoly a) -> PiecewisePoly a
@@ -458,11 +459,11 @@ minII' z p@(_, ps) q@(_, qs) pq' common' = minII z p q pq common where
 minPW' :: (Show a, Field a, Ord a) =>
     ZoomData a -> Square (PiecewisePoly a) -> PiecewisePoly a
 minPW' z (u, v) = case (u, v) of
-  (PWPoly p,       PWPoly q     )  -> minP'   z p q  Nothing
-  (PWPoly p,       PWIntersect q)  -> minPI'  z p q  (Nothing, Nothing) Nothing
-  (PWIntersect p,  PWPoly q     )  -> minPI'  z q p  (Nothing, Nothing) Nothing
-  (PWIntersect p,  PWIntersect q)  -> minII'  z q p  (Nothing, Nothing) Nothing
-  _ -> deepen
+  (PWPoly p,       PWPoly q     ) -> minP'   z p q  Nothing
+  (PWPoly p,       PWIntersect q) -> minPI'  z p q  (Nothing, Nothing) Nothing
+  (PWIntersect p,  PWPoly q     ) -> minPI'  z q p  (Nothing, Nothing) Nothing
+  (PWIntersect p,  PWIntersect q) -> minII'  z q p  (Nothing, Nothing) Nothing
+  _                               -> deepen
   where
   us = bisectedPW u
   vs = bisectedPW v
@@ -485,7 +486,7 @@ piecewiseBinOp regen op = h mempty where
   opRegen z = mapPair original >>> op >>> zoomedGenerate z
   opNotRegen _ = uncurry (liftA2 (,)) >>> fmap op
   op' = if regen then opRegen else opNotRegen
-  
+
   h z (u, v) = case (u, v) of
     (PWPoly p, PWPoly q) -> PWPoly $ op' z (p, q)
     (PWPoly p, PWIntersect (s, (q_0, q_1))) -> PWIntersect (s, (op' z (p, q_0), op' z (p, q_1)))
@@ -530,8 +531,8 @@ integralizePWLinear = fmap (bimap f g) where
       | otherwise = Right x
 
   g :: Separation Rational -> Separation' Rational Integer
-  g (Dyadic x)     = Dyadic x
-  g (Algebraic x)  = Algebraic $ first (makeIntegral >>> snd) x
+  g (Dyadic x)    = Dyadic x
+  g (Algebraic x) = Algebraic $ first (makeIntegral >>> snd) x
 
 showPWLinearIntegral :: [Either  (Either (Poly Integer) (Poly Rational))
                                  (Separation' Rational Integer)]

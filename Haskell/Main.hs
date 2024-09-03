@@ -1,12 +1,12 @@
 module Main where
 
-import Data.Maybe (isJust)
-import Debug.Trace (trace)
-import BoFun ()
-import Threshold ( iteratedMaj3, iteratedMaj5 )
-import PiecewisePoly (PiecewisePoly, evalPW, showPW)
-import Computing (computeMin)
-import qualified Explore
+import           BoFun              ()
+import           Computing          (computeMin)
+import           Data.Maybe         (isJust)
+import           Debug.Trace        (trace)
+import qualified Explore.ComputeAll
+import           PiecewisePoly      (PiecewisePoly, evalPW, showPW)
+import           Threshold          (iteratedMaj3, iteratedMaj5)
 
 {-
 * separated by 0 % 1
@@ -73,7 +73,7 @@ maj5_2 = computeMin $ Threshold.iteratedMaj5 2
 
 main :: IO ()
 main = do
-  Explore.main
+  Explore.ComputeAll.test2
   -- putStrLn $ "maj5_1: " ++ showPW maj5_1
   -- putStrLn $ "maj5_2: " ++ showPW maj5_2
   -- putStrLn $ "maj3_2: " ++ showPW maj3_2

@@ -52,3 +52,22 @@ We say that this is simple since it only consists of 2nd degree polynomials.
 We are not yet sure whether a simpler PW exists.
 
 Right now, computing the complexities for the 2^2^4 4-bit functions would take hours.
+
+## Smallest n and simplest example of a PP with two maxima in (0, 1)
+
+Found by checking the derivatives of adjacent segments.
+
+This one was found for a 4-bit function.
+
+Our method can sometimes give false positives as we use an approximative root finder.
+
+TODO: Rerun, may be error
+
+piecewise polynomial in [0, 1]:
++ separated by 0 % 1
++ piece [2,2,1,-1]
++ separated by 1 % 2
++ piece [4,-3,2,1]
++ separated by root of [-2,7,-6,0] between 1 % 2 and 1 % 1
++ piece [2,4,-4,1]
++ separated by 1 % 1

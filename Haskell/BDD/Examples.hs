@@ -1,11 +1,13 @@
 module BDD.Examples (module BDD.Examples, module Data.DecisionDiagram.BDD) where
-import qualified Prelude as P (fromIntegral, map)
-import Prelude (Ord, Bool(False, True), not, (||), and, or, Int, (+))
-import qualified Data.IntMap as IM (fromList)
-import Data.DecisionDiagram.BDD (BDD, ItemOrder, AscOrder, DescOrder,
-                                 false, true, var, ite, (.||.), (.&&.), orB, andB, notB,
-                                 restrict, pbAtLeast)
-import BDD.Ordering ()
+import           BDD.Ordering             ()
+import           Data.DecisionDiagram.BDD (AscOrder, BDD, DescOrder, ItemOrder,
+                                           andB, false, ite, notB, orB,
+                                           pbAtLeast, restrict, true, var,
+                                           (.&&.), (.||.))
+import qualified Data.IntMap              as IM (fromList)
+import           Prelude                  (Bool (False, True), Int, Ord, and,
+                                           not, or, (+), (||))
+import qualified Prelude                  as P (fromIntegral, map)
 
 type Fun = BDD AscOrder
 type Alg = BDD

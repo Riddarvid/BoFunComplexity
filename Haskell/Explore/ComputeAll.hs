@@ -3,28 +3,30 @@
 {-# HLINT ignore "Use head" #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE InstanceSigs          #-}
-{-# LANGUAGE TypeSynonymInstances  #-}
-module Explore.ComputeAll () where
-import           All                (AscOrder, BDD, ItemOrder, Poly (P), evalP,
-                                     false, genAlgThinMemoPoly, isConstBDD,
-                                     setBitBDD, support, xP)
-import           BDD.Examples       (pick, true)
+module Explore.ComputeAll (test2) where
+import           All                      (AscOrder, BDD, ItemOrder, Poly (P),
+                                           evalP, false, genAlgThinMemoPoly,
+                                           isConstBDD, setBitBDD, support, var,
+                                           xP)
+import           BDD.Examples             (notB, pick, sameB, true)
 import           BoFun
-import           Computing          (computeMin)
-import           Data.Complex       (Complex ((:+)), realPart)
-import           Data.Either        (isLeft)
-import           Data.Foldable      (find)
-import qualified Data.IntSet        as IS
-import           Data.Maybe         (fromJust, isJust)
-import           Data.Set           (Set, fromList, size, toList)
-import           Debug.Trace        (trace, traceShow)
-import           DSLsofMath.Algebra (AddGroup, Additive (zero), MulGroup,
-                                     Multiplicative (one))
-import           DSLsofMath.PSDS    (derP)
-import           PiecewisePoly      (PiecewisePoly, Separation,
-                                     Separation' (..), linearizePW, minPWs,
-                                     piecewiseFromPoly, printPW, showPW)
-import           Polynomial.Roots   (roots)
+import           Computing                (computeMin)
+import           Data.Complex             (Complex ((:+)), realPart)
+import           Data.DecisionDiagram.BDD ((.<=>.), (.||.))
+import           Data.Either              (isLeft)
+import           Data.Foldable            (find)
+import qualified Data.IntSet              as IS
+import           Data.Maybe               (fromJust, isJust)
+import           Data.Set                 (Set, fromList, size, toList)
+import           Debug.Trace              (trace, traceShow)
+import           DSLsofMath.Algebra       (AddGroup, Additive (zero), MulGroup,
+                                           Multiplicative (one))
+import           DSLsofMath.PSDS          (derP)
+import           PiecewisePoly            (PiecewisePoly, Separation,
+                                           Separation' (..), linearizePW,
+                                           minPWs, piecewiseFromPoly, printPW,
+                                           showPW)
+import           Polynomial.Roots         (roots)
 
 test :: IO ()
 test = mapM_ print (genAllPPs 4)
@@ -91,28 +93,26 @@ polySetToPW polys = minPWs $ map piecewiseFromPoly $ toList polys
 
 test2 :: IO ()
 test2 = mapM_ printPW $
-  filter hasTwoMaxima polys
+  filter (\p -> countMaxima p >= 2) polys
   where
     polys = map snd $
-      filterPieces 4 $
       genAllPPs 4
 
-hasTwoMaxima :: PiecewisePoly Rational -> Bool
-hasTwoMaxima pw = hasMaximum p1 p2 s12 && hasMaximum p3 p4 s34
-  where
-    [
-      _,
-      Left p1,
-      Right s12,
-      Left p2,
-      _,
-      Left p3,
-      Right s34,
-      Left p4,
-      Right _] = linearizePW pw
+countMaxima :: PiecewisePoly Rational -> Int
+countMaxima = countMaxima' . linearizePW
 
+countMaxima' :: [Either (Poly Rational) (Separation Rational)] -> Int
+countMaxima' (Right _ : xs) = countMaxima' xs
+countMaxima' (Left p1 : Right s : Left p2 : xs)
+  | hasMaximum p1 p2 s = 1 + rest
+  | otherwise = rest
+  where
+    rest = countMaxima' (Left p2 : xs)
+countMaxima' _ = 0
+
+-- The problem right now is finding the correct root.
 hasMaximum :: Poly Rational -> Poly Rational -> Separation Rational -> Bool
-hasMaximum p1 p2 s = evalP p1' p > zero && evalP p1' p < zero
+hasMaximum p1 p2 s = evalP p1' p > zero && evalP p2' p < zero
   where
     p1' = derP p1
     p2' = derP p2
@@ -122,4 +122,7 @@ hasMaximum p1 p2 s = evalP p1' p > zero && evalP p1' p < zero
         where
           pRoots :: [Double]
           pRoots = map realPart $ roots 1e-16 1000 $ map ((:+ zero) . fromRational) pPoly
-          root = toRational $ fromJust $ find (\n -> fromRational low <= n && n <= fromRational high) pRoots
+          root = toRational $ fromJust $ find (\n -> fromRational low < n && n < fromRational high) pRoots
+
+sim5 :: BDD AscOrder
+sim5 = notB (sameB [var 0, var 1, var 2]) .||. sameB [var 3, var 4]

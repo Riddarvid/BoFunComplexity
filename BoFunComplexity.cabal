@@ -44,4 +44,6 @@ executable main
                        memoize >= 1.1,
                        mtl >= 2.2,
                        multiset >= 0.3.4.3,
-                       gnuplot
+                       gnuplot,
+                       decision-diagrams >= 0.2,
+                       dsp >= 0.2.5.2
