@@ -1,16 +1,17 @@
 module Computing (computeMin) where
-import BoFun (BoFun (..))
-import Data.Monoid (Endo(..))
-import Data.Maybe (isJust)
-import DSLsofMath.Algebra
-    ( Multiplicative((*), one), Additive((+), zero), (-) )
-import Prelude hiding ((+), (-), (*))
-import Control.Arrow((>>>))
-import Data.Function.Memoize (Memoizable(..), traceMemoize, memoFix)
-import PiecewisePoly ( PiecewisePoly, minPWs )
-import Data.Function (fix)
+import           BoFun                 (BoFun (..))
+import           Control.Arrow         ((>>>))
+import           Data.Function         (fix)
+import           Data.Function.Memoize (Memoizable (..), memoFix, traceMemoize)
+import           Data.Maybe            (isJust)
+import           Data.Monoid           (Endo (..))
+import           DSLsofMath.Algebra    (Additive (zero, (+)),
+                                        Multiplicative (one, (*)), (-))
+import           PiecewisePoly         (PiecewisePoly, minPWs)
+import           Prelude               hiding ((*), (+), (-))
 
-
+-- TODO: Would be nice to create a "both" function similar to the one in All, so that
+-- we could know which function resulted in a certain piece of a PW.
 computeMinStep :: (Show f, BoFun f i) => Endo (f -> PiecewisePoly Rational)
 computeMinStep = Endo $ \recCall fun -> if isJust (isConst fun)
   then zero -- If the function is constant, then it takes 0 steps to calculate it.

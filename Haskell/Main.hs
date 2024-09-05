@@ -73,7 +73,7 @@ maj5_2 = computeMin $ Threshold.iteratedMaj5 2
 
 main :: IO ()
 main = do
-  Explore.ComputeAll.test2
+  mapM_ print Explore.ComputeAll.findSimplest
   -- putStrLn $ "maj5_1: " ++ showPW maj5_1
   -- putStrLn $ "maj5_2: " ++ showPW maj5_2
   -- putStrLn $ "maj3_2: " ++ showPW maj3_2

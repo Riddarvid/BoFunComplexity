@@ -61,7 +61,7 @@ This one was found for a 4-bit function.
 
 Our method can sometimes give false positives as we use an approximative root finder.
 
-TODO: Rerun, may be error
+We have found that there are exactly 648 4-bit functions with 2 maxima.
 
 piecewise polynomial in [0, 1]:
 + separated by 0 % 1
@@ -71,3 +71,23 @@ piecewise polynomial in [0, 1]:
 + separated by root of [-2,7,-6,0] between 1 % 2 and 1 % 1
 + piece [2,4,-4,1]
 + separated by 1 % 1
+
+A problem that we've realized is that the roots separating the functions may not be rational. Therefore, we must convert to working with reals instead.
+
+We have now done more rigorous searching of the 4-bit PPs with 2 maxima. We have arrived at the conclusion that all of these contain at least one piece which is of at least degree 3. We did this by computing the complexities of all 4-bit functions, filtering out those with 2 maxima, counting the degrees of the PPs, finding the minimum, and then filtering on that.
+## Smallest n and simplest example of a PP with three maxima in (0, 1)
+
+
+piecewise polynomial in [0, 1]:
++ separated by 0.0
++ piece [3.0,2.0,-2.0,1.0]
++ separated by root of [1.0,-5.0,6.0,-2.0] between 0.0 and 0.5
++ piece [4.0,-3.0,4.0,-1.0]
++ separated by 0.5
++ piece [4.0,-2.0,1.0,1.0]
++ separated by root of [0.0,1.0,0.0,-2.0] between 0.5 and 1.0
++ piece [4.0,-1.0,1.0,-1.0]
++ separated by 1.0
+
+
+![[Pasted image 20240905093302.png]]

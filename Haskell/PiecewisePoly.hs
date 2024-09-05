@@ -559,6 +559,29 @@ showPW = linearizePW >>> integralizePWLinear >>> showPWLinearIntegral
 printPW :: PiecewisePoly Rational -> IO ()
 printPW = showPW >>> putStrLn
 
+printPWAny :: (AddGroup a, MulGroup a, Eq a, Show a) => PiecewisePoly a -> IO ()
+printPWAny = showPWAny >>> putStrLn
+
+showPWAny :: (AddGroup a, MulGroup a, Eq a, Show a) => PiecewisePoly a -> String
+showPWAny = linearizePW >>> showPWAny'
+
+showPWAny' :: (Show a) => [Either (Poly a) (Separation a)] -> String
+showPWAny' = fmap (either f g >>> ("+ " ++)) >>>
+                        ("piecewise polynomial in [0, 1]:" :) >>>
+                        unlines where
+  show' :: forall a. (Show a) => Poly a -> String
+  show' = unP >>> show
+
+  f :: (Show a) => Poly a -> String
+  f p = "piece " ++ show' p
+
+  g :: (Show a) => Separation a -> String
+  g p = "separated by " ++ s where
+    s = case p of
+      Dyadic x -> show x
+      Algebraic (r, (b_0, b_1))  ->  "root of " ++ show' r
+                                 ++  " between " ++ show b_0 ++ " and " ++ show b_1
+
 ----------------------------------------------------------------
 -- Testing
 

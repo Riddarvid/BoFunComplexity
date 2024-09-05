@@ -35,7 +35,7 @@ library
 
 executable main
   main-is:             Main.hs
-  other-modules:       Util, BoFun, Threshold, DSLsofMath.Algebra, DSLsofMath.FunExp, DSLsofMath.PSDS, PolynomialExtra, PiecewisePoly, Explore, Computing
+  other-modules:       Util, BoFun, Threshold, DSLsofMath.Algebra, DSLsofMath.FunExp, DSLsofMath.PSDS, PolynomialExtra, PiecewisePoly, Explore, Computing, Explore.ComputeAll
   hs-source-dirs:      Haskell
   default-language:    Haskell2010
   build-depends:       base >=4.13 && <4.19,

@@ -3,11 +3,12 @@
 {-# HLINT ignore "Use head" #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE InstanceSigs          #-}
-module Explore.ComputeAll (test2) where
-import           All                      (AscOrder, BDD, ItemOrder, Poly (P),
-                                           evalP, false, genAlgThinMemoPoly,
-                                           isConstBDD, setBitBDD, support, var,
-                                           xP)
+module Explore.ComputeAll (test2, findSimplest) where
+import           All                      (Al, AscOrder, BDD, Both (Both),
+                                           ItemOrder, Poly (P), evalP, false,
+                                           genAlgThinMemo', genAlgThinMemoBoth,
+                                           genAlgThinMemoPoly, isConstBDD,
+                                           setBitBDD, support, var, xP)
 import           BDD.Examples             (notB, pick, sameB, true)
 import           BoFun
 import           Computing                (computeMin)
@@ -22,10 +23,11 @@ import           Debug.Trace              (trace, traceShow)
 import           DSLsofMath.Algebra       (AddGroup, Additive (zero), MulGroup,
                                            Multiplicative (one))
 import           DSLsofMath.PSDS          (derP)
+import           Numeric                  (fromRat)
 import           PiecewisePoly            (PiecewisePoly, Separation,
                                            Separation' (..), linearizePW,
                                            minPWs, piecewiseFromPoly, printPW,
-                                           showPW)
+                                           printPWAny, showPW)
 import           Polynomial.Roots         (roots)
 
 test :: IO ()
@@ -92,16 +94,16 @@ polySetToPW :: (Show a, AddGroup a, MulGroup a, Ord a) => Set (Poly a) -> Piecew
 polySetToPW polys = minPWs $ map piecewiseFromPoly $ toList polys
 
 test2 :: IO ()
-test2 = mapM_ printPW $
-  filter (\p -> countMaxima p >= 2) polys
+test2 = mapM_ printPWAny $
+  filter (\p -> countMaxima p == 2) polys
   where
-    polys = map snd $
-      genAllPPs 4
+    polys :: [PiecewisePoly Double]
+    polys = map (fmap fromRational . snd) (genAllPPs 4)
 
-countMaxima :: PiecewisePoly Rational -> Int
-countMaxima = countMaxima' . linearizePW
+countMaxima :: (AddGroup a, Multiplicative a, MulGroup a, Real a) => PiecewisePoly a -> Int
+countMaxima pw = countMaxima' $ linearizePW (fmap realToFrac pw :: PiecewisePoly Double)
 
-countMaxima' :: [Either (Poly Rational) (Separation Rational)] -> Int
+countMaxima' :: (RealFloat a, AddGroup a, Multiplicative a) => [Either (Poly a) (Separation a)] -> Int
 countMaxima' (Right _ : xs) = countMaxima' xs
 countMaxima' (Left p1 : Right s : Left p2 : xs)
   | hasMaximum p1 p2 s = 1 + rest
@@ -111,8 +113,11 @@ countMaxima' (Left p1 : Right s : Left p2 : xs)
 countMaxima' _ = 0
 
 -- The problem right now is finding the correct root.
-hasMaximum :: Poly Rational -> Poly Rational -> Separation Rational -> Bool
-hasMaximum p1 p2 s = evalP p1' p > zero && evalP p2' p < zero
+-- Another problem is that the root should be a real number but currently
+-- we're casting it to a rational number, which of course changes the value.
+-- Really, we should make the function work with real numbers instead.
+hasMaximum :: (RealFloat a, AddGroup a, Multiplicative a) => Poly a -> Poly a -> Separation a -> Bool
+hasMaximum p1 p2 s = evalP p1' (p - 0.001) > zero && evalP p2' (p + 0.001) < zero
   where
     p1' = derP p1
     p2' = derP p2
@@ -120,9 +125,66 @@ hasMaximum p1 p2 s = evalP p1' p > zero && evalP p2' p < zero
       Dyadic p'                        -> p'
       Algebraic (P pPoly, (low, high)) -> root
         where
-          pRoots :: [Double]
-          pRoots = map realPart $ roots 1e-16 1000 $ map ((:+ zero) . fromRational) pPoly
-          root = toRational $ fromJust $ find (\n -> fromRational low < n && n < fromRational high) pRoots
+          pRoots = map realPart $ roots 1e-16 1000 $ map (:+ zero) pPoly
+          root = fromJust $ find (\n -> low < n && n < high) pRoots
 
 sim5 :: BDD AscOrder
 sim5 = notB (sameB [var 0, var 1, var 2]) .||. sameB [var 3, var 4]
+
+
+test3 :: BothPW
+test3 = piecewiseBoth 2 (bddFromOutput 2 [False, True, False, False] :: BDD AscOrder)
+
+findSimplest :: [BothPW]
+findSimplest = map snd $ filter (\(degree, _) -> degree == minDegree) $
+  zip degrees allWith2maxima
+  where
+    minDegree = minimum degrees
+    degrees = map findDegree allWith2maxima
+    allWith2maxima = filter (\(BothPW pw _) -> countMaxima pw == 2) allBoths
+    allBoths = genAllBoths 4
+
+findDegree :: BothPW -> Int
+findDegree (BothPW pw _) = findDegree' pw
+
+findDegree' :: PiecewisePoly Rational -> Int
+findDegree' pw = maximum $ map findDegree'' $ extractPolys $ linearizePW pw
+
+findDegree'' :: Poly Rational -> Int
+findDegree'' (P xs) = length $ dropZeroes xs
+
+dropZeroes :: [Rational] -> [Rational]
+dropZeroes [] = []
+dropZeroes (n : ns)
+  | n == zero = case dropZeroes ns of
+    []  -> []
+    ns' -> n : ns'
+  | otherwise = n : dropZeroes ns
+
+extractPolys :: [Either (Poly Rational) (Separation Rational)] -> [Poly Rational]
+extractPolys []               = []
+extractPolys (Left poly : xs) = poly : extractPolys xs
+extractPolys (_ : xs)         = extractPolys xs
+
+data BothPW = BothPW (PiecewisePoly Rational) [(Poly Rational, Al)]
+
+instance Show BothPW where
+  show :: BothPW -> String
+  show (BothPW pw lookup) = showPW pw ++ "\n" ++ unlines
+    (map (\(poly, al) -> show poly ++ ":\t\t" ++ show al) lookup)
+
+-- Computes the PWs via genAlgBoth but then converts the resulting set of polynomials
+-- to a PW, and gives a lookup table from poly to decision tree.
+piecewiseBoth :: Int -> BDDFun -> BothPW
+piecewiseBoth arity f = BothPW pw lookupTable
+  where
+    boths :: [Both (Poly Rational) Al]
+    boths = toList $ genAlgThinMemo' arity f
+
+    lookupTable = map (\(Both poly al) -> (poly, al)) boths
+
+    pw = minPWs $ map (\(Both poly _) -> piecewiseFromPoly poly) boths
+
+genAllBoths :: Int -> [BothPW]
+genAllBoths n = map (\out -> piecewiseBoth n (bddFromOutput n out :: BDD AscOrder)) $
+  outputPermutations n
