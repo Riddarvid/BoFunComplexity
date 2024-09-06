@@ -1,25 +1,28 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE MultiWayIf #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE MultiWayIf             #-}
+{-# LANGUAGE TemplateHaskell        #-}
+{-# LANGUAGE UndecidableInstances   #-}
 module Threshold where
 
-import Control.Arrow ((>>>), first)
-import Control.Monad.Free(Free(..))
-import Data.Bifunctor (bimap)
-import Data.Either(partitionEithers)
-import Data.Function ((&))
-import Data.Functor.Classes (Eq1(..), Ord1(..), Show1(..), Eq2(..), Ord2(..), Show2(..), showsBinaryWith)
-import Data.Function.Memoize (Memoizable(..), deriveMemoizable, deriveMemoize)
-import Data.Maybe (Maybe(..))
-import qualified Data.MultiSet as MultiSet
-import Prelude hiding ((+), (-), negate, sum)
+import           Control.Arrow         (first, (>>>))
+import           Control.Monad.Free    (Free (..))
+import           Data.Bifunctor        (bimap)
+import           Data.Either           (partitionEithers)
+import           Data.Function         ((&))
+import           Data.Function.Memoize (Memoizable (..), deriveMemoizable,
+                                        deriveMemoize)
+import           Data.Functor.Classes  (Eq1 (..), Eq2 (..), Ord1 (..),
+                                        Ord2 (..), Show1 (..), Show2 (..),
+                                        showsBinaryWith)
+import           Data.Maybe            (Maybe (..))
+import qualified Data.MultiSet         as MultiSet
+import           Prelude               hiding (negate, sum, (+), (-))
 
-import DSLsofMath.Algebra (Additive(..), AddGroup(..), (-), sum)
+import           DSLsofMath.Algebra    (AddGroup (..), Additive (..), sum, (-))
 
-import BoFun
-import Util
+import           BoFun
+import           Util
 
 
 -- | A threshold for a Boolean function.
@@ -54,8 +57,8 @@ thresholdConst v = Threshold $ tabulateBool ((== v) >>> boolToInt)
 
 thresholdIsConst :: Threshold -> Maybe Bool
 thresholdIsConst (Threshold (nt, nf)) = if
-  | nt <= 0 -> Just True
-  | nf <= 0 -> Just False
+  | nt <= 0   -> Just True
+  | nf <= 0   -> Just False
   | otherwise -> Nothing
 
 -- | A majority threshold.
@@ -67,11 +70,13 @@ thresholdMaj = duplicate >>> Threshold
 
 -- | A threshold-type Boolean function.
 data ThresholdFun f = ThresholdFun {
-  threshold :: Threshold,
+  threshold          :: Threshold,
   -- The subfunctions.
   -- None of the subfunctions are constant.
   -- Normalization condition: if one of the thresholds is zero, then there are no subfunctions.
   thresholdFunctions :: MultiSet.MultiSet f
+  -- Arvid's comment: Right now, all the elements of thresholdFunctions must have the same
+  -- type, i.e. Symmetric or ThresholdFun etc. Doesn't this limit what we can express?
 } deriving (Show)
 
 -- Necessitated by misdesign of Haskell typeclasses.
@@ -114,7 +119,7 @@ thresholdFunConst val = ThresholdFun (thresholdConst val) MultiSet.empty
 thresholdFunNormalize :: (Eq f, BoFun f i) => ThresholdFun f -> ThresholdFun f
 thresholdFunNormalize u = case thresholdIsConst (threshold u) of
   Just val -> thresholdFunConst val
-  Nothing -> u
+  Nothing  -> u
 
 -- Reduces constant subfunctions in a threshold function.
 -- Not used for anything right now.
@@ -137,7 +142,7 @@ thresholdFunNormalizeSub (ThresholdFun t us) = ThresholdFun (t - s) (MultiSet.fr
 -- OUR UNDERSTANDING: A threshold function is made up of a list of sub-functions.
 -- The variables of our function can then be described by a combination of sub-function
 -- and sub-function-variable. The basic principle is that any time a sub function becomes
--- fully evaluated, we can reduce the appropriate threshold variable by one, and if the 
+-- fully evaluated, we can reduce the appropriate threshold variable by one, and if the
 -- threshold becomes zero, then we are done.
 
 -- TODO: Figure out why this needs UndecidableInstances. (Haskell...)
@@ -150,7 +155,7 @@ instance (Ord f, BoFun f i) => BoFun (ThresholdFun f) (Int, i) where
     return (i, v)
 
   setBit ((i, v), val) (ThresholdFun t us) = case isConst u' of
-    Just _ -> thresholdFunNormalize $ ThresholdFun t' us'
+    Just _  -> thresholdFunNormalize $ ThresholdFun t' us'
     Nothing -> ThresholdFun t $ MultiSet.insert u' us'
     where
     (u, _) = MultiSet.toAscOccurList us !! i
@@ -194,12 +199,12 @@ type IteratedThresholdFun' = IteratedThresholdFun ()
 
 instance BoFun IteratedThresholdFun' [Int] where
   isConst (Pure ()) = Nothing
-  isConst (Free u) = isConst u
+  isConst (Free u)  = isConst u
 
   variables (Pure ()) = [[]]
-  variables (Free v) = variables v & map (uncurry (:))
+  variables (Free v)  = variables v & map (uncurry (:))
 
-  setBit ([], val) (Pure u) = iteratedThresholdFunConst val
+  setBit ([], val) (Pure u)     = iteratedThresholdFunConst val
   setBit (i : is, val) (Free v) = Free $ setBit ((i, is), val) v
 
 

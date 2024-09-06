@@ -1,15 +1,15 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableInstances   #-}
 module BoFun where
 
-import Data.Function ((&))
-import qualified Data.Set as Set
-import Data.Void (Void, absurd)
+import           Data.Function ((&))
+import qualified Data.Set      as Set
+import           Data.Void     (Void, absurd)
 
-import Debug.Trace
+import           Debug.Trace
 
-import Util
+import           Util
 
 
 class BoFun f i | f -> i where
@@ -17,6 +17,14 @@ class BoFun f i | f -> i where
   variables :: f -> [i]
   -- TODO: return function i -> i that explains how the variables got renamed?
   setBit    :: (i, Bool) -> f -> f
+
+class BoFun2 f i | f -> i where
+  isConst2 :: f -> Maybe Bool
+  variables2 :: f -> [i]
+  setBit2 :: BoFun2 g i => (i, Bool) -> f -> g
+
+evalBoFun2 :: BoFun2 f i => f -> [(i, Bool)] -> Maybe Bool
+evalBoFun2 f vars = isConst2 $ foldr setBit2 f vars
 
 viewConst :: BoFun f i => f -> Either Bool f
 viewConst f = maybe (Right f) Left (isConst f)
@@ -49,13 +57,13 @@ instance BoFun (Maybe Bool) () where
   setBit ((), val) Nothing = Just val
 
 -- For a BoFun f, for each variable generates two new BoFuns by setting that variable to either
--- True or False. 
+-- True or False.
 outgoing :: (BoFun f i) => f -> [f]
 outgoing u = do
   v <- variables u
   val <- [True, False]
   return $ setBit (v, val) u
 
--- Recursively generates the set of all sub-BoFuns of f. 
+-- Recursively generates the set of all sub-BoFuns of f.
 reachable :: (Ord f, BoFun f i) => f -> Set.Set f
 reachable = dfs' outgoing

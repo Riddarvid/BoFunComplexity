@@ -3,7 +3,7 @@
 {-# HLINT ignore "Use head" #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE InstanceSigs          #-}
-module Explore.ComputeAll (test2, findSimplest) where
+module Explore.ComputeAll (test2, findSimplest, genAllBoths) where
 import           All                      (Al, AscOrder, BDD, Both (Both),
                                            ItemOrder, Poly (P), evalP, false,
                                            genAlgThinMemo', genAlgThinMemoBoth,

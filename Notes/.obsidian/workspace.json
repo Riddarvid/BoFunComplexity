@@ -73,7 +73,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Observation about PPs.md",
+                "file": "Analysis of classes.md",
                 "mode": "source",
                 "source": false
               }
@@ -146,7 +146,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Observation about PPs.md",
+                "file": "Analysis of classes.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -163,7 +163,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Observation about PPs.md",
+                "file": "Analysis of classes.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -186,7 +186,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Observation about PPs.md"
+                "file": "Analysis of classes.md"
               }
             }
           }
@@ -209,12 +209,13 @@
   },
   "active": "2d875f4af4168031",
   "lastOpenFiles": [
+    "Pasted image 20240906154104.png",
+    "Förklaring av arbetet.md",
+    "Observation about PPs.md",
     "Analysis of classes.md",
     "Egenskaper hos boolska funktioner.md",
-    "Förklaring av arbetet.md",
     "List of Known Bugs.md",
     "TODO.md",
-    "Observation about PPs.md",
     "Readme.md",
     "Pasted image 20240905093302.png",
     "Welcome.md"

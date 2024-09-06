@@ -4,6 +4,7 @@
 {-# LANGUAGE InstanceSigs         #-}
 {-# LANGUAGE TemplateHaskell      #-}
 {-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
 module All (module All, module BDD.Examples, module S, module Poly, module BDD) where
 import           BDD.Examples             (Index, fAC, maj2, maj3, maj33)
 import           Data.DecisionDiagram.BDD as BDD (AscOrder, BDD (Branch, Leaf),
@@ -26,6 +27,7 @@ import qualified Prelude                  as P
 -- see paper 2.4
 import           PolyCmp                  (OrdField, cmpPoly)
 -- see paper 3.4
+import qualified BoFun
 import           Debug.Trace
 
 {-

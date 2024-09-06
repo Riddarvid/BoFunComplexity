@@ -24,6 +24,10 @@ Given n input bits, there exist exactly 2^n functions with only one 1 in the out
 
 etc.
 
+One [False, True, True, False, True, True, False, False, False, True]
+
+![[Pasted image 20240906154104.png]]
+
 ## Symmetric functions
 
 What matters in a symmetric function is that each input pattern with the same number of 1s must give the same result.
