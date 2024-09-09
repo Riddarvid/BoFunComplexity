@@ -43,6 +43,8 @@ With 4 bits we find many PWs with more than 2 pieces.
 
 So far, the simplest one we've found is composed of
 
+TODO: Lägg in vilken funktion det var.
+
 p1(p) = 1 + 2p + p²
 p2(p) = 1 + 3p - p²
 p3(p) = 3 - p²
@@ -50,8 +52,6 @@ p3(p) = 3 - p²
 We say that this is simple since it only consists of 2nd degree polynomials.
 
 We are not yet sure whether a simpler PW exists.
-
-Right now, computing the complexities for the 2^2^4 4-bit functions would take hours.
 
 ## Smallest n and simplest example of a PP with two maxima in (0, 1)
 
@@ -77,6 +77,9 @@ A problem that we've realized is that the roots separating the functions may not
 We have now done more rigorous searching of the 4-bit PPs with 2 maxima. We have arrived at the conclusion that all of these contain at least one piece which is of at least degree 3. We did this by computing the complexities of all 4-bit functions, filtering out those with 2 maxima, counting the degrees of the PPs, finding the minimum, and then filtering on that.
 ## Smallest n and simplest example of a PP with three maxima in (0, 1)
 
+4-bit function.
+
+TODO: Skriv ner vilken funktion.
 
 piecewise polynomial in [0, 1]:
 + separated by 0.0
